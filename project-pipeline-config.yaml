@@ -1,0 +1,11 @@
+project-config:
+  project-name: global-secrets
+  project-description: "Helm chart for shared Infisical registry secrets"
+  project-namespace: default
+  publish-targets: [ghcr]
+  pipeline-steps:
+    helm-test: true
+    trivy-scan: true
+    opengrep-scan: true
+    helm-package-upload: true
+    argo-deploy: true

@@ -11,12 +11,8 @@ secrets:
     type: kubernetes.io/dockerconfigjson
     keys:
       .dockerconfigjson: DOCKER_CONFIG_JSON
-    reflection:
-      enabled: true
   - name: harbor-registry-secret
     secretPath: /registry/harbor
     type: kubernetes.io/dockerconfigjson
     keys:
       .dockerconfigjson: DOCKER_CONFIG_JSON
-    reflection:
-      enabled: true

@@ -25,7 +25,7 @@ It references the existing `InfisicalAuth`.
   CRD, including `targets[].secretType`.
 - An existing `InfisicalAuth` with access to the configured project,
   environment, and paths.
-- Reflector, if reflection is enabled for any Secret.
+- Reflector.
 - An existing release namespace. The development release uses `default`.
 
 The chart creates no resources with its default values.
@@ -55,15 +55,11 @@ secrets:
     type: kubernetes.io/dockerconfigjson
     keys:
       .dockerconfigjson: DOCKER_CONFIG_JSON
-    reflection:
-      enabled: true
   - name: harbor-registry-secret
     secretPath: /registry/harbor
     type: kubernetes.io/dockerconfigjson
     keys:
       .dockerconfigjson: DOCKER_CONFIG_JSON
-    reflection:
-      enabled: true
 ```
 
 `keys` maps a Kubernetes Secret key on the left to an Infisical key name
@@ -82,22 +78,20 @@ The chart supports source key names with dots and hyphens.
 | `secrets[].secretPath` | Yes | Absolute Infisical folder path. |
 | `secrets[].keys` | Yes | Non-empty map of target keys to source key names. |
 | `secrets[].type` | No | Defaults to `Opaque`. Docker configuration Secrets require a `.dockerconfigjson` mapping. |
-| `secrets[].reflection.enabled` | No | Defaults to `false`. When true, enables automatic reflection. |
-| `secrets[].reflection.namespaces` | No | List of destination namespace names. Omitted or empty means all namespaces. Used only when reflection is enabled. |
+| `secrets[].reflector` | No | List of destination namespace names. Defaults to `[]`, which means all namespaces. Omission has the same effect. |
 
-To restrict one Secret to selected namespaces, set its reflection options:
+Every Secret is reflected to all namespaces by default. To restrict one
+Secret to selected namespaces, add its `reflector` list:
 
 ```yaml
-reflection:
-  enabled: true
-  namespaces:
-    - jenkins
-    - apps
+reflector:
+  - jenkins
+  - apps
 ```
 
 The same list controls allowed reflection and automatic mirror creation.
-Each Secret can have a different list. Use `namespaces: []`, or omit the
-field, to keep reflection enabled for all namespaces.
+Each Secret can have a different list. Use `reflector: []`, or omit the
+field entirely, for all namespaces. There is no enable flag.
 
 The release namespace is used for every source Secret.
 The target creation policy is `Owner`: deleting its `InfisicalStaticSecret`

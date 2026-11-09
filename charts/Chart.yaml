@@ -2,4 +2,4 @@ apiVersion: v2
 name: global-secrets
 description: Shared Kubernetes Secrets synchronized from Infisical and reflected across namespaces.
 type: application
-version: 0.0.0
+version: 0.1.0-main-e892c73-1

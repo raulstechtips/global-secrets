@@ -82,7 +82,22 @@ The chart supports source key names with dots and hyphens.
 | `secrets[].secretPath` | Yes | Absolute Infisical folder path. |
 | `secrets[].keys` | Yes | Non-empty map of target keys to source key names. |
 | `secrets[].type` | No | Defaults to `Opaque`. Docker configuration Secrets require a `.dockerconfigjson` mapping. |
-| `secrets[].reflection.enabled` | No | Defaults to `false`. When true, enables automatic reflection to all namespaces. |
+| `secrets[].reflection.enabled` | No | Defaults to `false`. When true, enables automatic reflection. |
+| `secrets[].reflection.namespaces` | No | List of destination namespace names. Omitted or empty means all namespaces. Used only when reflection is enabled. |
+
+To restrict one Secret to selected namespaces, set its reflection options:
+
+```yaml
+reflection:
+  enabled: true
+  namespaces:
+    - jenkins
+    - apps
+```
+
+The same list controls allowed reflection and automatic mirror creation.
+Each Secret can have a different list. Use `namespaces: []`, or omit the
+field, to keep reflection enabled for all namespaces.
 
 The release namespace is used for every source Secret.
 The target creation policy is `Owner`: deleting its `InfisicalStaticSecret`
@@ -130,30 +145,35 @@ the intended first release, `0.1.0`. That release must be published before
 it can be synchronized. Alternatively, select a successfully published
 main build.
 
-Merge the cluster-config application definition before the chart's first
+Complete the legacy ownership transfer below before adopting the new
+automatically synchronized Application. Merge the cluster-config definition before the chart's first
 main build so `argoDeploy` has a target file to update. Main and release
 builds use the existing pipeline behavior to update that file in Git.
-The application has no automated sync policy, so publishing or updating
-its version does not deploy the Secrets.
+The Application uses automatic sync and self-healing. Once the selected chart
+is available, Argo CD applies it automatically and corrects differences from Git.
+Automatic pruning is not enabled.
 
 ## Migrate the existing GitHub registry Secret
 
-Perform these steps only when ready to deploy. Creating or merging the PRs
-does not perform them.
+Perform these steps before the root Application adopts the new definition.
+Merging that definition can enable deployment; the ownership transfer must
+be complete first.
 
 The legacy resource is
 `default/infisical-secret-github-registry-secret`, kind `InfisicalSecret`.
 It currently owns `default/github-registry-secret`. Do not delete it with
 the default cascading deletion policy.
 
-1. Publish the selected chart version and make sure the two Infisical
+1. Make sure the two Infisical
    source paths contain their `DOCKER_CONFIG_JSON` values.
-2. Let the root Argo application adopt the new
-   `argo/dev/global-secrets.yaml` definition. Do not sync the child yet.
+2. Keep the root Application from adopting the new
+   `argo/dev/global-secrets.yaml` definition until step 7. Disable automatic
+   sync on the legacy global-secrets Application during the transfer.
+   If a parent manages that setting, change its source definition too so
+   the parent does not restore automatic sync during the transfer.
 3. Open **Argo CD > Applications > global-secrets > App Details**.
-   Confirm that its source is the new Helm chart, its values source is
-   `apps/dev/global-secrets.yaml`, and automated sync is disabled.
-   Do not continue while the old source or automated sync is active.
+   Confirm that the legacy source is still selected and automated sync
+   is disabled. Do not sync it during the ownership transfer.
 4. Confirm that the existing source Secret is present:
 
    ```text
@@ -178,9 +198,12 @@ the default cascading deletion policy.
 
    If the old owner reference remains, stop before syncing the new chart.
    Do not print the Secret data.
-7. In **Argo CD > global-secrets**, select **Sync**, inspect the two
-   `InfisicalStaticSecret` resources, then synchronize them. Do not select
-   prune as part of this first ownership transfer.
+7. Let the root Application adopt the new `argo/dev/global-secrets.yaml`
+   definition. Publish the selected chart version, or select a version that
+   is already published. In **Argo CD > global-secrets > App Details**,
+   confirm the new Helm source, the `apps/dev/global-secrets.yaml` values
+   source, automatic sync, and self-healing. Argo CD now synchronizes the
+   two `InfisicalStaticSecret` resources automatically. Leave pruning off.
 8. Check the operator resources and source Secret types:
 
    ```text

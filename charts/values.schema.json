@@ -53,7 +53,16 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "enabled": { "type": "boolean" }
+              "enabled": { "type": "boolean" },
+              "namespaces": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "maxLength": 63,
+                  "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                }
+              }
             }
           }
         },

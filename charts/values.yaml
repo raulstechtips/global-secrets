@@ -9,5 +9,7 @@ infisical:
 # Each entry has a name, secretPath and keys map.
 # keys maps Kubernetes Secret keys to Infisical source key names.
 # Optional type defaults to Opaque; reflection.enabled defaults to false.
+# reflection.namespaces restricts enabled reflection to the listed namespaces.
+# Omit namespaces or use [] to reflect to all namespaces.
 # Source Secrets are created in the chart's release namespace.
 secrets: []

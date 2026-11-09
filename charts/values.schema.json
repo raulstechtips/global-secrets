@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["infisical", "secrets"],
+  "properties": {
+    "infisical": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authRef", "projectSlug", "environmentSlug", "refreshInterval"],
+      "properties": {
+        "authRef": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "namespace"],
+          "properties": {
+            "name": { "type": "string" },
+            "namespace": { "type": "string" }
+          }
+        },
+        "projectSlug": { "type": "string" },
+        "environmentSlug": { "type": "string" },
+        "refreshInterval": {
+          "type": "string",
+          "pattern": "^([5-9]s|[1-9][0-9]+s|[1-9][0-9]*[mhdw])$"
+        }
+      }
+    },
+    "secrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "secretPath", "keys"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 253,
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+          },
+          "secretPath": { "type": "string", "pattern": "^/" },
+          "type": { "type": "string", "minLength": 1 },
+          "keys": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": { "pattern": "^[-._a-zA-Z0-9]+$" },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[-._a-zA-Z0-9]+$"
+            }
+          },
+          "reflector": {
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "maxLength": 63,
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "required": ["type"],
+              "properties": { "type": { "const": "kubernetes.io/dockerconfigjson" } }
+            },
+            "then": { "properties": { "keys": { "required": [".dockerconfigjson"] } } }
+          }
+        ]
+      }
+    }
+  }
+}

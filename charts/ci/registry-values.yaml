@@ -1,0 +1,18 @@
+infisical:
+  authRef:
+    name: test-auth
+    namespace: test-auth-namespace
+  projectSlug: test-project
+  environmentSlug: test
+  refreshInterval: 60s
+secrets:
+  - name: github-registry-secret
+    secretPath: /registry
+    type: kubernetes.io/dockerconfigjson
+    keys:
+      .dockerconfigjson: DOCKER_CONFIG_JSON
+  - name: harbor-registry-secret
+    secretPath: /registry/harbor
+    type: kubernetes.io/dockerconfigjson
+    keys:
+      .dockerconfigjson: DOCKER_CONFIG_JSON

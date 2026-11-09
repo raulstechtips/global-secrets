@@ -1,0 +1,15 @@
+# Reference the shared authentication resources. Do not put credentials here.
+infisical:
+  authRef:
+    name: ""
+    namespace: ""
+  projectSlug: ""
+  environmentSlug: ""
+  refreshInterval: 60s
+# Each entry has a name, secretPath and keys map.
+# keys maps Kubernetes Secret keys to Infisical source key names.
+# Optional type defaults to Opaque.
+# reflector is an optional list of destination namespaces for each Secret.
+# Omit reflector or use reflector: [] to reflect to all namespaces.
+# Source Secrets are created in the chart's release namespace.
+secrets: []
